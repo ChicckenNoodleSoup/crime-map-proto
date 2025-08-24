@@ -24,22 +24,22 @@ required_cols = ["barangay", "dateCommitted", "timeCommitted", "lat", "lng", "of
 excel_files = [f for f in os.listdir(DATA_FOLDER) if f.endswith(".xlsx")]
 
 if not excel_files:
-    print("❌ No Excel files found in the data folder.")
+    print(" No Excel files found in the data folder.")
     exit(1)
 
-print(f"📂 Found {len(excel_files)} Excel file(s): {excel_files}")
+print(f" Found {len(excel_files)} Excel file(s): {excel_files}")
 
 all_data = []
 
 for file in excel_files:
     path = os.path.join(DATA_FOLDER, file)
-    print(f"\n📥 Processing file: {file}")
+    print(f"\n Processing file: {file}")
     all_sheets = pd.read_excel(path, sheet_name=None)
 
     for sheet_name, df in all_sheets.items():
         print(f"  - Sheet: {sheet_name} ({len(df)} rows)")
         if not set(required_cols).issubset(df.columns):
-            print(f"    ⚠ Skipping sheet '{sheet_name}' — missing required columns.")
+            print(f"     Skipping sheet '{sheet_name}' — missing required columns.")
             continue
 
         df = df[required_cols]
@@ -48,18 +48,18 @@ for file in excel_files:
         df = df.dropna(subset=["dateCommitted"])
         df = df.sort_values(by="dateCommitted").reset_index(drop=True)
 
-        print(f"    ✅ Cleaned data: {len(df)} rows remain.")
+        print(f"     Cleaned data: {len(df)} rows remain.")
         all_data.append(df)
 
 if not all_data:
-    print("❌ No valid data found in any Excel files.")
+    print(" No valid data found in any Excel files.")
     exit(1)
 
 df_all = pd.concat(all_data, ignore_index=True)
 df_all = df_all.sort_values(by="dateCommitted").reset_index(drop=True)
 
-print(f"\n📊 Combined data has {len(df_all)} rows.")
-print(f"📅 Year range: {df_all['dateCommitted'].dt.year.min()} - {df_all['dateCommitted'].dt.year.max()}")
+print(f"\n Combined data has {len(df_all)} rows.")
+print(f" Year range: {df_all['dateCommitted'].dt.year.min()} - {df_all['dateCommitted'].dt.year.max()}")
 
 # ==============================
 # STEP 2: CREATE TABLE IF NOT EXISTS
@@ -84,7 +84,7 @@ try:
     connection = mysql.connector.connect(**DB_CONFIG)
     cursor = connection.cursor()
 
-    print("\n🔗 Connecting to MySQL and creating table if not exists...")
+    print("\n Connecting to MySQL and creating table if not exists...")
     cursor.execute(create_table_query)
 
     insert_query = f"""
@@ -106,13 +106,13 @@ try:
         rows_inserted += cursor.rowcount
 
     connection.commit()
-    print(f"✅ Successfully inserted {rows_inserted} new records into `{TABLE_NAME}`.")
+    print(f" Successfully inserted {rows_inserted} new records into `{TABLE_NAME}`.")
 
 except Error as e:
-    print(f"❌ MySQL Error: {e}")
+    print(f" MySQL Error: {e}")
 
 finally:
     if 'connection' in locals() and connection.is_connected():
         cursor.close()
         connection.close()
-        print("🔌 MySQL connection closed.")
+        print(" MySQL connection closed.")
