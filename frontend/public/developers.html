@@ -5,31 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Our Developers</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f4f4f4;
+    /* Reset some default styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    h1 { color: #333; }
-    ul { list-style-type: none; padding: 0; }
-    li {
-      background: #fff;
-      margin: 10px 0;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      color: #333;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.5rem;
+      color: #222;
+    }
+
+    .team-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .member-card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      flex: 1 1 250px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .member-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+
+    .member-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #111;
+    }
+
+    .member-role {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    /* Optional: small footer */
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      color: #888;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
   <h1>Meet the Developers</h1>
-  <ul>
-    <li>Bautista, Eicee Lance Austin S.</li>
-    <li>Dueñas, Erholled Clarence T.</li>
-    <li>Lozano, Jan Nikko M.</li>
-    <li>Magno, Jennylyn D.</li>
-    <li>Mañalac, Gelsey Erine E.</li>
-    <li>Reyes, Simon Marcus V.Erh</li>
-  </ul>
+  <div class="team-container">
+    <div class="member-card">
+      <div class="member-name">Bautista, Eicee Lance Austin S.</div>
+      <div class="member-role">Frontend / Backend</div>
+    </div>
+    <div class="member-card">
+      <div class="member-name">Dueñas, Erholled Clarence T.</div>
+      <div class="member-role">Backend / Database</div>
+    </div>
+    <div class="member-card">
+      <div class="member-name">Lozano, Jan Nikko M.</div>
+      <div class="member-role">Project Lead / Mobile App</div>
+    </div>
+    <div class="member-card">
+      <div class="member-name">Magno, Jennylyn D.</div>
+      <div class="member-role">UI/UX Design</div>
+    </div>
+    <div class="member-card">
+      <div class="member-name">Mañalac, Gelsey Erine E.</div>
+      <div class="member-role">Frontend / Testing</div>
+    </div>
+    <div class="member-card">
+      <div class="member-name">Reyes, Simon Marcus V.Erh</div>
+      <div class="member-role">Documentation / QA</div>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Crime Map Project Team
+  </footer>
 </body>
 </html>
