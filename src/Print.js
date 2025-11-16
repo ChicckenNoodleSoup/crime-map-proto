@@ -304,46 +304,46 @@ function Print() {
           <div className="dashboard-card p-6 mb-6" style={{ width: '100%', maxWidth: 'none', padding: '40px 48px' }}>
             <h2 className="text-2xl font-bold mb-8">Report Filters</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div style={{ marginBottom: '8px' }}>
-            <label className="block text-sm font-medium mb-4">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              min={minDate}
-              max={maxDate}
-              className="filter-input"
-            />
-          </div>
-          <div style={{ marginBottom: '8px' }}>
-            <label className="block text-sm font-medium mb-4">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              min={minDate}
-              max={maxDate}
-              className="filter-input"
-            />
-          </div>
-          <div style={{ marginBottom: '8px' }}>
-            <label className="block text-sm font-medium mb-4">Barangay</label>
-            <CustomDropdown
-              options={barangayList}
-              value={selectedBarangay}
-              onChange={(e) => setSelectedBarangay(e.target.value)}
-              allLabel="All Barangays"
-            />
-          </div>
-          <div style={{ marginBottom: '8px' }}>
-            <label className="block text-sm font-medium mb-4">Severity</label>
-            <CustomDropdown
-              options={['Critical', 'High', 'Medium', 'Low', 'Minor']}
-              value={selectedSeverity}
-              onChange={(e) => setSelectedSeverity(e.target.value)}
-              allLabel="All Severities"
-            />
-          </div>
+              <div style={{ marginBottom: '8px' }}>
+                <label className="block text-sm font-medium mb-4">Start Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  min={minDate}
+                  max={maxDate}
+                  className="filter-input"
+                />
+              </div>
+              <div style={{ marginBottom: '8px' }}>
+                <label className="block text-sm font-medium mb-4">End Date</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={minDate}
+                  max={maxDate}
+                  className="filter-input"
+                />
+              </div>
+              <div style={{ marginBottom: '8px' }}>
+                <label className="block text-sm font-medium mb-4">Barangay</label>
+                <CustomDropdown
+                  options={barangayList}
+                  value={selectedBarangay}
+                  onChange={(e) => setSelectedBarangay(e.target.value)}
+                  allLabel="All Barangays"
+                />
+              </div>
+              <div style={{ marginBottom: '8px' }}>
+                <label className="block text-sm font-medium mb-4">Severity</label>
+                <CustomDropdown
+                  options={['Critical', 'High', 'Medium', 'Low', 'Minor']}
+                  value={selectedSeverity}
+                  onChange={(e) => setSelectedSeverity(e.target.value)}
+                  allLabel="All Severities"
+                />
+              </div>
             </div>
             {minDate && (
               <p className="text-xs text-gray-400 mt-8 mb-4">
@@ -381,181 +381,151 @@ function Print() {
 
       {/* Printable Report Section */}
       <div className="print-only">
-        <div className="max-w-6xl mx-auto bg-white">
-        {/* Header */}
-        <div className="border-b-3 border-gray-900 pb-4 mb-4">
-          <div className="text-center mb-2">
-            <h1 className="text-4xl font-bold mb-1">ROAD TRAFFIC ACCIDENT REPORT</h1>
-            <p className="text-sm text-gray-600">For Official Use Only</p>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-            <div>
-              <p><strong>Report Generated:</strong> {new Date().toLocaleString()}</p>
-              <p><strong>Report Period:</strong> {startDate || minDate || 'All Records'} to {endDate || maxDate || 'Present'}</p>
-            </div>
-            <div>
-              {selectedBarangay && <p><strong>Barangay Filter:</strong> {selectedBarangay}</p>}
-              {selectedSeverity && <p><strong>Severity Filter:</strong> {selectedSeverity}</p>}
-              <p><strong>Total Accidents:</strong> {stats.total}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Executive Summary - Key Metrics */}
-        <section className="mb-4">
-          <h2 className="text-2xl font-bold mb-3 border-b-2 border-gray-700 pb-2">
-            EXECUTIVE SUMMARY
-          </h2>
-          
-          <div className="grid grid-cols-4 gap-4 mb-4">
-            <div className="border-2 border-gray-300 p-3 text-center bg-gray-50">
-              <p className="text-sm font-semibold text-gray-600 mb-1">TOTAL ACCIDENTS</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-            </div>
-            <div className="border-2 border-red-300 p-3 text-center bg-red-50">
-              <p className="text-sm font-semibold text-red-600 mb-1">CRITICAL/HIGH</p>
-              <p className="text-3xl font-bold text-red-700">
-                {(statsAll.severityCounts['Critical'] || 0) + (statsAll.severityCounts['High'] || 0)}
-              </p>
-            </div>
-            <div className="border-2 border-blue-300 p-3 text-center bg-blue-50">
-              <p className="text-sm font-semibold text-blue-600 mb-1">HIGH-RISK ZONES</p>
-              <p className="text-3xl font-bold text-blue-700">{clusters.filter(c => c.danger_score > 0.7).length}</p>
-            </div>
-            <div className="border-2 border-orange-300 p-3 text-center bg-orange-50">
-              <p className="text-sm font-semibold text-orange-600 mb-1">LOCATIONS AFFECTED</p>
-              <p className="text-3xl font-bold text-orange-700">{Object.keys(stats.barangayCounts).length}</p>
+        <div className="print-report-container">
+          {/* Report Header */}
+          <div className="print-header">
+            <div className="print-header-content">
+              <div className="print-header-main">
+                <h1 className="print-title">ROAD TRAFFIC ACCIDENT REPORT</h1>
+                <p className="print-subtitle">City of San Fernando Police Station</p>
+                <p className="print-subtitle-secondary">For Official Use Only</p>
+              </div>
+              <div className="print-header-info">
+                <div className="print-info-row">
+                  <span className="print-info-label">Report Generated:</span>
+                  <span className="print-info-value">{new Date().toLocaleString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                  })}</span>
+                </div>
+                <div className="print-info-row">
+                  <span className="print-info-label">Report Period:</span>
+                  <span className="print-info-value">{startDate || minDate || 'All Records'} to {endDate || maxDate || 'Present'}</span>
+                </div>
+                {selectedBarangay && (
+                  <div className="print-info-row">
+                    <span className="print-info-label">Barangay Filter:</span>
+                    <span className="print-info-value">{selectedBarangay}</span>
+                  </div>
+                )}
+                {selectedSeverity && (
+                  <div className="print-info-row">
+                    <span className="print-info-label">Severity Filter:</span>
+                    <span className="print-info-value">{selectedSeverity}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-bold mb-2 text-gray-800">TOP 5 HIGH-RISK BARANGAYS</h3>
-              <table className="w-full text-sm border border-gray-300">
-                <thead className="bg-gray-200">
-                  <tr>
-                    <th className="border px-2 py-1 text-left">Barangay</th>
-                    <th className="border px-2 py-1 text-right">Accidents</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedBarangays.slice(0, 5).map(([barangay, count]) => (
-                    <tr key={barangay}>
-                      <td className="border px-2 py-1">{barangay}</td>
-                      <td className="border px-2 py-1 text-right font-semibold">{count}</td>
+          {/* Executive Summary */}
+          <section className="print-section">
+            <h2 className="print-section-title">EXECUTIVE SUMMARY</h2>
+            
+            <div className="print-metrics-grid">
+              <div className="print-metric-card print-metric-primary">
+                <div className="print-metric-label">TOTAL ACCIDENTS</div>
+                <div className="print-metric-value">{stats.total}</div>
+              </div>
+              <div className="print-metric-card print-metric-danger">
+                <div className="print-metric-label">CRITICAL/HIGH SEVERITY</div>
+                <div className="print-metric-value">
+                  {(statsAll.severityCounts['Critical'] || 0) + (statsAll.severityCounts['High'] || 0)}
+                </div>
+              </div>
+              <div className="print-metric-card print-metric-warning">
+                <div className="print-metric-label">HIGH-RISK ZONES</div>
+                <div className="print-metric-value">{clusters.filter(c => c.danger_score > 0.7).length}</div>
+              </div>
+              <div className="print-metric-card print-metric-info">
+                <div className="print-metric-label">LOCATIONS AFFECTED</div>
+                <div className="print-metric-value">{Object.keys(stats.barangayCounts).length}</div>
+              </div>
+            </div>
+
+            <div className="print-summary-grid">
+              <div className="print-summary-box">
+                <h3 className="print-summary-title">TOP 5 HIGH-RISK BARANGAYS</h3>
+                <table className="print-table print-table-compact">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Barangay</th>
+                      <th className="text-right">Accidents</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div>
-              <h3 className="font-bold mb-2 text-gray-800">SEVERITY DISTRIBUTION</h3>
-              <table className="w-full text-sm border border-gray-300">
-                <thead className="bg-gray-200">
-                  <tr>
-                    <th className="border px-2 py-1 text-left">Level</th>
-                    <th className="border px-2 py-1 text-right">Count</th>
-                    <th className="border px-2 py-1 text-right">%</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(statsAll.severityCounts)
-                    .sort((a, b) => {
-                      const order = { 'Critical': 1, 'High': 2, 'Medium': 3, 'Low': 4, 'Minor': 5 };
-                      return (order[a[0]] || 99) - (order[b[0]] || 99);
-                    })
-                    .map(([severity, count]) => (
-                      <tr key={severity} className={severity === 'Critical' || severity === 'High' ? 'bg-red-50' : ''}>
-                        <td className="border px-2 py-1">{severity}</td>
-                        <td className="border px-2 py-1 text-right font-semibold">{count}</td>
-                        <td className="border px-2 py-1 text-right">{((count / statsAll.total) * 100).toFixed(1)}%</td>
+                  </thead>
+                  <tbody>
+                    {sortedBarangays.slice(0, 5).map(([barangay, count], index) => (
+                      <tr key={barangay}>
+                        <td className="text-center">{index + 1}</td>
+                        <td>{barangay}</td>
+                        <td className="text-right font-bold">{count}</td>
                       </tr>
                     ))}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
+              </div>
+              <div className="print-summary-box">
+                <h3 className="print-summary-title">SEVERITY DISTRIBUTION</h3>
+                <table className="print-table print-table-compact">
+                  <thead>
+                    <tr>
+                      <th>Severity Level</th>
+                      <th className="text-right">Count</th>
+                      <th className="text-right">Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(statsAll.severityCounts)
+                      .sort((a, b) => {
+                        const order = { 'Critical': 1, 'High': 2, 'Medium': 3, 'Low': 4, 'Minor': 5 };
+                        return (order[a[0]] || 99) - (order[b[0]] || 99);
+                      })
+                      .map(([severity, count]) => (
+                        <tr key={severity} className={severity === 'Critical' || severity === 'High' ? 'print-row-highlight' : ''}>
+                          <td className="font-semibold">{severity}</td>
+                          <td className="text-right font-bold">{count}</td>
+                          <td className="text-right">{statsAll.total > 0 ? ((count / statsAll.total) * 100).toFixed(1) : 0}%</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Geographic Analysis - Complete Barangay Breakdown */}
-        <section className="mb-4">
-          <h2 className="text-2xl font-bold mb-3 border-b-2 border-gray-700 pb-2">
-            GEOGRAPHIC ANALYSIS
-          </h2>
-          <p className="text-sm text-gray-600 mb-3">Complete breakdown of accidents by barangay, ranked by frequency</p>
-          <table className="w-full border-collapse border border-gray-300 text-sm">
-            <thead>
-              <tr className="bg-gray-800 text-white">
-                <th className="border border-gray-400 px-3 py-2 text-left">Rank</th>
-                <th className="border border-gray-400 px-3 py-2 text-left">Barangay</th>
-                <th className="border border-gray-400 px-3 py-2 text-right">Total Accidents</th>
-                <th className="border border-gray-400 px-3 py-2 text-right">% of Total</th>
-                <th className="border border-gray-400 px-3 py-2 text-center">Risk Level</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedBarangays.map(([barangay, count], i) => {
-                // Calculate percentage based on ALL barangays' total, not filtered total
-                const percentage = (count / statsAllBarangays.total) * 100;
-                const riskLevel = percentage > 10 ? 'HIGH' : percentage > 5 ? 'MEDIUM' : 'LOW';
-                const riskColor = riskLevel === 'HIGH' ? 'bg-red-100' : riskLevel === 'MEDIUM' ? 'bg-yellow-100' : '';
-                return (
-                  <tr key={barangay} className={riskColor}>
-                    <td className="border border-gray-300 px-3 py-2 font-semibold">{i + 1}</td>
-                    <td className="border border-gray-300 px-3 py-2 font-semibold">{barangay}</td>
-                    <td className="border border-gray-300 px-3 py-2 text-right">{count}</td>
-                    <td className="border border-gray-300 px-3 py-2 text-right">{percentage.toFixed(1)}%</td>
-                    <td className="border border-gray-300 px-3 py-2 text-center font-bold">
-                      <span className={`px-2 py-1 rounded ${
-                        riskLevel === 'HIGH' ? 'bg-red-200 text-red-800' :
-                        riskLevel === 'MEDIUM' ? 'bg-yellow-200 text-yellow-800' :
-                        'bg-green-200 text-green-800'
-                      }`}>
-                        {riskLevel}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </section>
-
-        {/* Temporal Analysis */}
-        {sortedMonths.length > 1 && (
-          <section className="mb-4">
-            <h2 className="text-2xl font-bold mb-3 border-b-2 border-gray-700 pb-2">
-              TEMPORAL ANALYSIS
-            </h2>
-            <p className="text-sm text-gray-600 mb-3">Monthly accident trends for identifying patterns and seasonal variations</p>
-            <table className="w-full border-collapse border border-gray-300 text-sm">
+          {/* Geographic Analysis */}
+          <section className="print-section">
+            <h2 className="print-section-title">GEOGRAPHIC ANALYSIS</h2>
+            <p className="print-section-description">Complete breakdown of accidents by barangay, ranked by frequency</p>
+            <table className="print-table">
               <thead>
-                <tr className="bg-gray-800 text-white">
-                  <th className="border border-gray-400 px-3 py-2 text-left">Period</th>
-                  <th className="border border-gray-400 px-3 py-2 text-right">Accidents</th>
-                  <th className="border border-gray-400 px-3 py-2 text-right">% of Total</th>
-                  <th className="border border-gray-400 px-3 py-2 text-center">Trend</th>
+                <tr>
+                  <th className="text-center">Rank</th>
+                  <th>Barangay</th>
+                  <th className="text-right">Total Accidents</th>
+                  <th className="text-right">% of Total</th>
+                  <th className="text-center">Risk Level</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedMonths.map(([month, count], index) => {
-                  const prevCount = index > 0 ? sortedMonths[index - 1][1] : count;
-                  const trend = count > prevCount ? '↑' : count < prevCount ? '↓' : '→';
-                  const trendColor = count > prevCount ? 'text-red-600' : count < prevCount ? 'text-green-600' : 'text-gray-600';
+                {sortedBarangays.map(([barangay, count], i) => {
+                  const percentage = statsAllBarangays.total > 0 ? (count / statsAllBarangays.total) * 100 : 0;
+                  const riskLevel = percentage > 10 ? 'HIGH' : percentage > 5 ? 'MEDIUM' : 'LOW';
                   return (
-                    <tr key={month}>
-                      <td className="border border-gray-300 px-3 py-2">
-                        {new Date(`${month}-01`).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                        })}
-                      </td>
-                      <td className="border border-gray-300 px-3 py-2 text-right font-semibold">{count}</td>
-                      <td className="border border-gray-300 px-3 py-2 text-right">
-                        {((count / stats.total) * 100).toFixed(1)}%
-                      </td>
-                      <td className={`border border-gray-300 px-3 py-2 text-center font-bold text-xl ${trendColor}`}>
-                        {trend}
+                    <tr key={barangay} className={riskLevel === 'HIGH' ? 'print-row-high-risk' : riskLevel === 'MEDIUM' ? 'print-row-medium-risk' : ''}>
+                      <td className="text-center font-bold">{i + 1}</td>
+                      <td className="font-semibold">{barangay}</td>
+                      <td className="text-right font-bold">{count}</td>
+                      <td className="text-right">{percentage.toFixed(1)}%</td>
+                      <td className="text-center">
+                        <span className={`print-risk-badge print-risk-${riskLevel.toLowerCase()}`}>
+                          {riskLevel}
+                        </span>
                       </td>
                     </tr>
                   );
@@ -563,83 +533,115 @@ function Print() {
               </tbody>
             </table>
           </section>
-        )}
 
-        {/* High-Risk Locations - Priority Enforcement Areas */}
-        <section className="mb-4">
-          <h2 className="text-2xl font-bold mb-3 border-b-2 border-gray-700 pb-2">
-            HIGH-RISK LOCATIONS - PRIORITY ENFORCEMENT AREAS
-          </h2>
-          <p className="text-sm text-gray-600 mb-3">Accident clusters requiring immediate attention and increased patrol presence</p>
-          {clusters.length > 0 ? (
-            <>
-              <div className="mb-3 p-2 bg-yellow-50 border-l-4 border-yellow-500">
-                <p className="font-semibold text-yellow-800 text-sm">⚠️ ALERT: {clusters.filter(c => c.danger_score > 0.7).length} locations identified as CRITICAL RISK zones</p>
-              </div>
-              <table className="w-full border-collapse border border-gray-300 text-sm">
+          {/* Temporal Analysis */}
+          {sortedMonths.length > 1 && (
+            <section className="print-section">
+              <h2 className="print-section-title">TEMPORAL ANALYSIS</h2>
+              <p className="print-section-description">Monthly accident trends for identifying patterns and seasonal variations</p>
+              <table className="print-table">
                 <thead>
-                  <tr className="bg-gray-800 text-white">
-                    <th className="border border-gray-400 px-3 py-2 text-left">Priority</th>
-                    <th className="border border-gray-400 px-3 py-2 text-left">GPS Coordinates</th>
-                    <th className="border border-gray-400 px-3 py-2 text-left">Affected Barangays</th>
-                    <th className="border border-gray-400 px-3 py-2 text-right">Total Accidents</th>
-                    <th className="border border-gray-400 px-3 py-2 text-right">Recent (90d)</th>
-                    <th className="border border-gray-400 px-3 py-2 text-center">Danger Level</th>
+                  <tr>
+                    <th>Period</th>
+                    <th className="text-right">Accidents</th>
+                    <th className="text-right">% of Total</th>
+                    <th className="text-center">Trend</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {clusters.slice(0, 15).map((c, index) => {
-                    const dangerLevel = c.danger_score > 0.7 ? 'CRITICAL' : c.danger_score > 0.5 ? 'HIGH' : c.danger_score > 0.3 ? 'MODERATE' : 'LOW';
-                    const dangerColor = dangerLevel === 'CRITICAL' ? 'bg-red-100' : dangerLevel === 'HIGH' ? 'bg-orange-100' : dangerLevel === 'MODERATE' ? 'bg-yellow-100' : '';
+                  {sortedMonths.map(([month, count], index) => {
+                    const prevCount = index > 0 ? sortedMonths[index - 1][1] : count;
+                    const trend = count > prevCount ? '↑' : count < prevCount ? '↓' : '→';
+                    const trendClass = count > prevCount ? 'print-trend-up' : count < prevCount ? 'print-trend-down' : 'print-trend-stable';
                     return (
-                      <tr key={c.cluster_id} className={dangerColor}>
-                        <td className="border border-gray-300 px-3 py-2 font-bold text-center">{index + 1}</td>
-                        <td className="border border-gray-300 px-3 py-2 font-mono text-xs">
-                          {c.center_lat?.toFixed(5)}, {c.center_lon?.toFixed(5)}
+                      <tr key={month}>
+                        <td className="font-semibold">
+                          {new Date(`${month}-01`).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                          })}
                         </td>
-                        <td className="border border-gray-300 px-3 py-2 text-xs">
-                          {Array.isArray(c.barangays)
-                            ? c.barangays.join(', ')
-                            : c.barangays?.split(/[,;]+|(?<=\D)\s+(?=\D)/)
-                                .map(b => b.trim())
-                                .filter(Boolean)
-                                .join(', ')}
-                        </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right font-semibold">{c.accident_count}</td>
-                        <td className="border border-gray-300 px-3 py-2 text-right font-semibold">{c.recent_accidents}</td>
-                        <td className="border border-gray-300 px-3 py-2 text-center">
-                          <div className="font-bold">
-                            <span className={`px-2 py-1 rounded text-xs ${
-                              dangerLevel === 'CRITICAL' ? 'bg-red-600 text-white' :
-                              dangerLevel === 'HIGH' ? 'bg-orange-600 text-white' :
-                              dangerLevel === 'MODERATE' ? 'bg-yellow-600 text-white' :
-                              'bg-gray-400 text-white'
-                            }`}>
-                              {dangerLevel}
-                            </span>
-                            <div className="text-xs text-gray-600 mt-1">{(c.danger_score * 100).toFixed(0)}%</div>
-                          </div>
-                        </td>
+                        <td className="text-right font-bold">{count}</td>
+                        <td className="text-right">{stats.total > 0 ? ((count / stats.total) * 100).toFixed(1) : 0}%</td>
+                        <td className={`text-center font-bold print-trend ${trendClass}`}>{trend}</td>
                       </tr>
                     );
-                  })}
-                </tbody>
+                 })}
+              </tbody>
               </table>
-            </>
-          ) : (
-            <p className="text-gray-600">No cluster data available for analysis.</p>
+            </section>
           )}
-        </section>
 
-        {/* Footer */}
-        <div className="text-center text-xs text-gray-500 mt-8 pt-4 border-t-2 border-gray-300">
-          <p className="font-bold">CONFIDENTIAL - FOR OFFICIAL USE ONLY</p>
-          <p className="mt-1">Generated using OSIMAP (Optimized Spatial Information Map for Accident Prevention)</p>
-          <p>Philippine National Police - Traffic Management Division</p>
-        </div>
+          {/* High-Risk Locations */}
+          <section className="print-section">
+            <h2 className="print-section-title">HIGH-RISK LOCATIONS</h2>
+            <p className="print-section-description">Accident clusters requiring immediate attention and increased patrol presence</p>
+            {clusters.length > 0 ? (
+              <>
+                {clusters.filter(c => c.danger_score > 0.7).length > 0 && (
+                  <div className="print-alert-box">
+                    <strong>⚠️ ALERT:</strong> {clusters.filter(c => c.danger_score > 0.7).length} location{clusters.filter(c => c.danger_score > 0.7).length !== 1 ? 's' : ''} identified as CRITICAL RISK zones requiring immediate intervention
+                  </div>
+                )}
+                <table className="print-table">
+                  <thead>
+                    <tr>
+                      <th className="text-center">Priority</th>
+                      <th>GPS Coordinates</th>
+                      <th>Affected Barangays</th>
+                      <th className="text-right">Total Accidents</th>
+                      <th className="text-right">Recent (90d)</th>
+                      <th className="text-center">Danger Level</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clusters.slice(0, 15).map((c, index) => {
+                      const dangerLevel = c.danger_score > 0.7 ? 'CRITICAL' : c.danger_score > 0.5 ? 'HIGH' : c.danger_score > 0.3 ? 'MODERATE' : 'LOW';
+                      const dangerClass = dangerLevel === 'CRITICAL' ? 'print-row-critical' : dangerLevel === 'HIGH' ? 'print-row-high' : dangerLevel === 'MODERATE' ? 'print-row-moderate' : '';
+                      return (
+                        <tr key={c.cluster_id} className={dangerClass}>
+                          <td className="text-center font-bold">{index + 1}</td>
+                          <td className="print-coordinates">
+                            {c.center_lat?.toFixed(5)}, {c.center_lon?.toFixed(5)}
+                          </td>
+                          <td>
+                            {Array.isArray(c.barangays)
+                              ? c.barangays.join(', ')
+                              : c.barangays?.split(/[,;]+|(?<=\D)\s+(?=\D)/)
+                                  .map(b => b.trim())
+                                  .filter(Boolean)
+                                  .join(', ')}
+                          </td>
+                          <td className="text-right font-bold">{c.accident_count}</td>
+                          <td className="text-right font-bold">{c.recent_accidents}</td>
+                          <td className="text-center">
+                            <div className="print-danger-badge-container">
+                              <span className={`print-danger-badge print-danger-${dangerLevel.toLowerCase()}`}>
+                                {dangerLevel}
+                              </span>
+                              <div className="print-danger-score">{(c.danger_score * 100).toFixed(0)}%</div>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </>
+            ) : (
+              <p className="print-no-data">No cluster data available for analysis.</p>
+            )}
+          </section>
+
+          {/* Footer */}
+          <div className="print-footer">
+            <div className="print-footer-line"></div>
+            <p className="print-footer-confidential">CONFIDENTIAL - FOR OFFICIAL USE ONLY</p>
+            <p className="print-footer-system">Generated using OSIMAP (Optimized Spatial Information Map for Accident Prevention)</p>
+            <p className="print-footer-org">City of San Fernando Police Station</p>
+          </div>
         </div>
       </div>
-
     </div>
   );
 }
