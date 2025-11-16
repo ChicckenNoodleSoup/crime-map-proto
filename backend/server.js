@@ -4,7 +4,8 @@ import path from "path";
 import cors from "cors";
 import fs from "fs";
 import { spawn } from "child_process";
-import XLSX from "xlsx";  
+import XLSX from "xlsx";
+import NodeCache from "node-cache";  
 
 const app = express();
 const PORT = process.env.PORT || 5000; 
@@ -44,7 +45,43 @@ if (!fs.existsSync(dataFolder)) {
   fs.mkdirSync(dataFolder);
 }
 
-// Serve static files from the data directory
+// OPTIMIZATION: Backend caching for frequently accessed data
+// Cache with 5-minute TTL, check for expired entries every 60 seconds
+const cache = new NodeCache({ 
+  stdTTL: 300, // 5 minutes default TTL
+  checkperiod: 60 // Check for expired entries every minute
+});
+
+// OPTIMIZATION: Cached GeoJSON endpoint for MapView (must be BEFORE static middleware)
+// Cache the entire GeoJSON file to reduce disk I/O for MapView
+app.get('/data/accidents_clustered.geojson', (req, res) => {
+  const cacheKey = 'geojson_clustered';
+  const cached = cache.get(cacheKey);
+  
+  if (cached) {
+    return res.json(cached);
+  }
+  
+  try {
+    const geojsonPath = path.join(dataFolder, 'accidents_clustered.geojson');
+    
+    if (!fs.existsSync(geojsonPath)) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+    
+    const data = JSON.parse(fs.readFileSync(geojsonPath, 'utf8'));
+    
+    // Cache for 5 minutes
+    cache.set(cacheKey, data, 300);
+    
+    res.json(data);
+  } catch (error) {
+    console.error('Error reading GeoJSON:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+// Serve static files from the data directory (other files like accidents.geojson)
 app.use('/data', express.static(dataFolder));
 
 // Multer storage configuration
@@ -415,6 +452,22 @@ const completeCurrentTask = (success = true, errorMessage = null) => {
   
   console.log(`✅ Task completed: ${currentTask.type}`);
   
+  // OPTIMIZATION: Clear cache when clustering completes (data is now stale)
+  if (success && (currentTask.type === 'clustering' || currentTask.type === 'upload')) {
+    // Clear GeoJSON cache (new data generated)
+    cache.del('geojson_clustered');
+    
+    // Clear all cluster count caches (they're now stale)
+    const keys = cache.keys();
+    keys.forEach(key => {
+      if (key.startsWith('cluster_count_')) {
+        cache.del(key);
+      }
+    });
+    
+    console.log('🔄 Cache invalidated after ' + currentTask.type);
+  }
+  
   // Calculate final processing time
   const finalProcessingTime = processingStartTime ? 
     Math.floor((new Date() - processingStartTime) / 1000) : 0;
@@ -699,6 +752,65 @@ app.get("/data-files", (req, res) => {
   } catch (error) {
     console.error("Error reading data folder:", error);
     res.status(500).json({ message: "Error reading data folder", error: error.message });
+  }
+});
+
+// OPTIMIZATION: Lightweight endpoint for cluster count by year
+// Returns only the count, not the entire GeoJSON file (much faster for Dashboard)
+app.get('/api/clusters/count', (req, res) => {
+  const year = req.query.year;
+  
+  if (!year) {
+    return res.status(400).json({ error: 'Year parameter is required' });
+  }
+
+  // Cache key includes year for per-year caching
+  const cacheKey = `cluster_count_${year}`;
+  const cached = cache.get(cacheKey);
+  
+  if (cached !== undefined) {
+    return res.json({ year: parseInt(year), clusterCount: cached });
+  }
+
+  try {
+    const geojsonPath = path.join(dataFolder, 'accidents_clustered.geojson');
+    
+    if (!fs.existsSync(geojsonPath)) {
+      return res.status(404).json({ error: 'GeoJSON file not found' });
+    }
+
+    // Read and parse GeoJSON file
+    const geojsonData = JSON.parse(fs.readFileSync(geojsonPath, 'utf8'));
+    
+    if (!geojsonData.features) {
+      return res.json({ year: parseInt(year), clusterCount: 0 });
+    }
+
+    // Filter accidents by year (exclude cluster centers)
+    const accidents = geojsonData.features.filter(f =>
+      f.properties &&
+      f.geometry &&
+      f.geometry.coordinates &&
+      f.properties.type !== "cluster_center" &&
+      String(f.properties.year) === String(year)
+    );
+
+    // Get unique cluster IDs from accidents (excluding noise -1)
+    const uniqueClusterIds = new Set(
+      accidents
+        .map(f => f.properties.cluster)
+        .filter(cluster => cluster !== null && cluster !== undefined && cluster !== -1)
+    );
+
+    const clusterCount = uniqueClusterIds.size;
+
+    // Cache the result for 5 minutes
+    cache.set(cacheKey, clusterCount, 300);
+
+    res.json({ year: parseInt(year), clusterCount });
+  } catch (error) {
+    console.error('Error calculating cluster count:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 });
 

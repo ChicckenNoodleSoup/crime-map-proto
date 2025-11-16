@@ -86,43 +86,19 @@ function Dashboard() {
     }
   };
 
-  // Fetch clustered accidents from GeoJSON and barangay counts from Supabase
+  // OPTIMIZATION: Fetch clustered accidents using lightweight endpoint
+  // Uses new /api/clusters/count endpoint instead of downloading entire GeoJSON file
   const fetchClusteredAccidentCount = async (y) => {
     setLoadingClusters(true);
     setLoadingBarangays(true);
     
     try {
-      // Fetch cluster data from GeoJSON file (like MapView does)
-      const response = await fetch("http://localhost:5000/data/accidents_clustered.geojson");
+      // Use lightweight endpoint that returns only the count (much faster)
+      const response = await fetch(`http://localhost:5000/api/clusters/count?year=${y}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const geoData = await response.json();
+      const data = await response.json();
       
-      // Filter to get cluster centers for the selected year
-      const clusterCenters = geoData.features.filter(f =>
-        f.properties && 
-        f.properties.type === "cluster_center"
-      );
-      
-      // Filter accidents by year
-      const accidents = geoData.features.filter(f =>
-        f.properties && 
-        f.geometry && 
-        f.geometry.coordinates &&
-        f.properties.type !== "cluster_center" &&
-        String(f.properties.year) === String(y)
-      );
-      
-      // Get unique cluster IDs from accidents in this year (excluding noise -1)
-      const uniqueClusterIds = new Set(
-        accidents
-          .map(f => f.properties.cluster)
-          .filter(cluster => cluster !== null && cluster !== undefined && cluster !== -1)
-      );
-      
-      // Count the number of distinct clusters
-      const clusterCount = uniqueClusterIds.size;
-      
-      console.log(`Year ${y}: ${accidents.length} accidents, ${clusterCount} clusters`);
+      const clusterCount = data.clusterCount || 0;
       
       setClusteredAccidentsCount(clusterCount);
       
