@@ -284,13 +284,30 @@ function Dashboard() {
   const totalPages = calculateTotalPages();
 
   useEffect(() => {
-    fetchUserData();
-    // Fetch all data in parallel for faster loading
-    Promise.all([
-      fetchCountForYear(year),
-      fetchClusteredAccidentCount(year),
-      fetchSeverityCounts(year)
-    ]);
+    let mounted = true;
+    
+    const loadData = async () => {
+      try {
+        fetchUserData();
+        // Fetch all data in parallel for faster loading
+        await Promise.all([
+          fetchCountForYear(year),
+          fetchClusteredAccidentCount(year),
+          fetchSeverityCounts(year)
+        ]);
+      } catch (error) {
+        if (mounted) {
+          console.error('Error loading dashboard data:', error);
+          // Show error message to user (could add toast notification here)
+        }
+      }
+    };
+    
+    loadData();
+    
+    return () => {
+      mounted = false;
+    };
   }, [year]);
 
   return (

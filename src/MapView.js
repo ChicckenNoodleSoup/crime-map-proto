@@ -23,22 +23,16 @@ import FullscreenFilters from './FullscreenFilters';
 import MultiSelectDropdown from './MultiSelectDropdown';
 import SingleSelectDropdown from './SingleSelectDropdown';
 import { LoadingSpinner } from './components/LoadingSpinner';
-
-// Cluster colors
-const getClusterColor = (clusterId) => {
-  const colors = [
-    "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7",
-    "#DDA0DD", "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E9",
-    "#F8C471", "#82E0AA", "#F1948A", "#85C1E9", "#D7DBDD",
-  ];
-  return clusterId === -1 ? "#95A5A6" : colors[clusterId % colors.length];
-};
-
-// San Fernando bounding box
-const sanFernandoBounds = [
-  [14.90, 120.50],
-  [15.16, 120.80],
-];
+import {
+  getClusterColor,
+  SAN_FERNANDO_BOUNDS,
+  BARANGAY_COORDINATES,
+  SEVERITY_INTENSITY_MAP,
+  MAP_CENTER,
+  MAP_DEFAULT_ZOOM,
+  MAP_MIN_ZOOM,
+  MAP_MAX_ZOOM
+} from './utils/constants';
 
 // Heatmap layer
 function ClusteredHeatmapLayer({ filteredData, showHeatmap }) {
@@ -52,8 +46,7 @@ function ClusteredHeatmapLayer({ filteredData, showHeatmap }) {
         const [lng, lat] = geometry.coordinates;
         if (typeof lat !== "number" || typeof lng !== "number" || lat === 0 || lng === 0) return null;
 
-        const severityMap = { Critical: 1, High: 0.8, Medium: 0.6, Low: 0.4, Minor: 0.2 };
-        const intensity = properties.severity ? severityMap[properties.severity] || 0.5 : 0.5;
+        const intensity = properties.severity ? SEVERITY_INTENSITY_MAP[properties.severity] || 0.5 : 0.5;
         return [lat, lng, intensity];
       })
       .filter(Boolean);
@@ -65,7 +58,7 @@ function ClusteredHeatmapLayer({ filteredData, showHeatmap }) {
     const heatLayer = L.heatLayer(heatmapPoints, {
       radius: 25,
       blur: 15,
-      maxZoom: 18,
+      maxZoom: MAP_MAX_ZOOM,
       gradient: { 0.2: "blue", 0.4: "cyan", 0.6: "lime", 0.8: "yellow", 1: "red" },
       minOpacity: 0.4,
     });
@@ -373,44 +366,6 @@ const SearchZoomControl = ({ searchTerm, searchResults, onRecordSelect }) => {
   return null;
 };
 
-// Barangay coordinates
-const barangayCoordinates = {
-  'alasas': [15.0122, 120.6966],
-  'baliti': [15.1050, 120.6239],
-  'bulaon': [15.0706, 120.6917],
-  'calulut': [15.0667, 120.7000],
-  'del carmen': [15.0250, 120.6708],
-  'del pilar': [15.0337, 120.6911],
-  'del rosario': [15.0075, 120.6822],
-  'dela paz norte': [15.0500, 120.6833],
-  'dela paz sur': [15.0444, 120.6875],
-  'dolores': [15.0192, 120.6625],
-  'juliana': [15.0328, 120.6822],
-  'lara': [15.0094, 120.6700],
-  'lourdes': [15.0244, 120.6556],
-  'magliman': [15.0461, 120.6733],
-  'maimpis': [15.0494, 120.6683],
-  'malino': [15.1221, 120.6310],
-  'malpitic': [15.0383, 120.6953],
-  'pandaras': [15.0583, 120.6967],
-  'panipuan': [15.1161, 120.6675],
-  'pulung bulu': [15.0322, 120.6865],
-  'quebiawan': [15.0394, 120.6935],
-  'saguin': [15.0372, 120.6793],
-  'san agustin': [15.0314, 120.6793],
-  'san felipe': [15.0094, 120.6916],
-  'san isidro': [15.0258, 120.6751],
-  'san jose': [15.0350, 120.6872],
-  'san juan': [15.0172, 120.6811],
-  'san nicolas': [15.0497, 120.6915],
-  'san pedro': [15.0190, 120.6990],
-  'sta. lucia': [15.0431, 120.6886],
-  'sta. teresita': [15.0625, 120.7056],
-  'sto. niño': [15.0363, 120.6797],
-  'sto. rosario': [15.0334, 120.6871],
-  'sindalan': [15.1014, 120.6581],
-  'telabastagan': [15.0608, 120.6860]
-};
 
 // Cache for GeoJSON data to avoid re-fetching
 let cachedGeoJSON = null;
@@ -608,13 +563,13 @@ export default function MapView() {
     }
 
     const barangayName = term.toLowerCase().trim();
-    if (barangayCoordinates[barangayName]) {
+    if (BARANGAY_COORDINATES[barangayName]) {
       setSearchResults([{
         id: `barangay-${barangayName}`,
         type: 'barangay',
         name: barangayName.charAt(0).toUpperCase() + barangayName.slice(1),
-        lat: barangayCoordinates[barangayName][0],
-        lng: barangayCoordinates[barangayName][1]
+        lat: BARANGAY_COORDINATES[barangayName][0],
+        lng: BARANGAY_COORDINATES[barangayName][1]
       }]);
       setShowSearchDropdown(true);
       return;
@@ -833,16 +788,16 @@ export default function MapView() {
         <div className="map-card">
           <div className="mapview-wrapper">
             <MapContainer
-              center={[15.0306, 120.6845]}
-              zoom={14}
-              minZoom={12}
-              maxZoom={18}
+              center={MAP_CENTER}
+              zoom={MAP_DEFAULT_ZOOM}
+              minZoom={MAP_MIN_ZOOM}
+              maxZoom={MAP_MAX_ZOOM}
               scrollWheelZoom={true}
               className="mapview-map"
               preferCanvas={true}
               updateWhenZooming={false}
               updateWhenIdle={true}
-              maxBounds={sanFernandoBounds}
+              maxBounds={SAN_FERNANDO_BOUNDS}
               maxBoundsViscosity={1.0}
             >
 
