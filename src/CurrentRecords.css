@@ -5,9 +5,20 @@
   box-sizing: border-box;
 }
 
+/* Scroll wrapper - enables vertical scrolling */
+.scroll-wrapper {
+  padding: 24px;
+  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
 .records-container {
   width: 100%;
   padding: 0;
+  min-height: calc(100vh - 48px); /* Account for padding */
 }
 
 /* Page wrapper for consistent spacing */

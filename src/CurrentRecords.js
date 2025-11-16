@@ -6,10 +6,11 @@ import { DateTime } from "./DateTime";
 import { supabase } from "./supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { usePageState } from "./contexts/PageStateContext";
-import SingleSelectDropdown from "./SingleSelectDropdown";
 import { isAdministrator } from "./utils/authUtils";
 import { useUpload } from "./contexts/UploadContext";
 import { LoadingSpinner } from "./components/LoadingSpinner";
+import RecordModal from "./components/records/RecordModal";
+import FiltersSection from "./components/records/FiltersSection";
 
 function CurrentRecords() {
   // Use persistent state for filters, search, sort, and pagination
@@ -42,8 +43,6 @@ function CurrentRecords() {
     year: ''
   });
   const [message, setMessage] = useState('');
-  const [activeTooltip, setActiveTooltip] = useState(null);
-  const tooltipTimers = React.useRef({});
 
   // Clustering with background task support
   const { startUpload, activeUploads } = useUpload();
@@ -355,31 +354,6 @@ function CurrentRecords() {
     }
   };
 
-  // Tooltip handlers
-  const handleTooltipMouseEnter = (tooltipId) => {
-    if (tooltipTimers.current[tooltipId]) {
-      clearTimeout(tooltipTimers.current[tooltipId]);
-    }
-    tooltipTimers.current[tooltipId] = setTimeout(() => {
-      setActiveTooltip(tooltipId);
-    }, 600); // Show tooltip after 600ms
-  };
-
-  const handleTooltipMouseLeave = (tooltipId) => {
-    if (tooltipTimers.current[tooltipId]) {
-      clearTimeout(tooltipTimers.current[tooltipId]);
-    }
-    setActiveTooltip(null);
-  };
-
-  // Tooltip renderer component
-  const Tooltip = ({ id, text, children }) => (
-    <div className="tooltip-wrapper" onMouseEnter={() => handleTooltipMouseEnter(id)} onMouseLeave={() => handleTooltipMouseLeave(id)}>
-      {children}
-      {activeTooltip === id && <div className="tooltip-text">{text}</div>}
-    </div>
-  );
-  
 
 
   return (
@@ -444,69 +418,18 @@ function CurrentRecords() {
         )}
 
         {/* Filters and Sort Section */}
-        <div className="filters-section">
-          <div className="filters-container">
-            <div className="filter-group">
-              <label className="filter-label">Barangay</label>
-              <SingleSelectDropdown
-                options={barangayList}
-                selectedValue={selectedBarangay}
-                onChange={(value) => {
-                  setSelectedBarangay(value);
-                  setCurrentPage(1);
-                }}
-                placeholder="All Barangays"
-                allLabel="All Barangays"
-                allValue="all"
-              />
-            </div>
-
-            <div className="filter-group">
-              <label className="filter-label">Severity</label>
-              <SingleSelectDropdown
-                options={['Critical', 'High', 'Medium', 'Low', 'Minor']}
-                selectedValue={selectedSeverity}
-                onChange={(value) => {
-                  setSelectedSeverity(value);
-                  setCurrentPage(1);
-                }}
-                placeholder="All Severities"
-                allLabel="All Severities"
-                allValue="all"
-              />
-            </div>
-
-            <div className="filter-group">
-              <label className="filter-label">Sort By</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="sort-select"
-              >
-                <option value="date-desc">Date (Newest First)</option>
-                <option value="date-asc">Date (Oldest First)</option>
-                <option value="severity">Severity (High to Low)</option>
-                <option value="severity-asc">Severity (Low to High)</option>
-              </select>
-            </div>
-
-          <button
-              onClick={() => {
-                setSelectedBarangay("all");
-                setSelectedSeverity("all");
-                setSortBy("date-desc");
-                setSearchTerm("");
-                setCurrentPage(1);
-              }}
-              className="clear-filters-btn"
-              disabled={selectedBarangay === "all" && selectedSeverity === "all" && sortBy === "date-desc" && !searchTerm}
-            >
-              <Tooltip id="clear-filters" text="Reset all filters and search to show all records">
-                Clear All Filters
-              </Tooltip>
-          </button>
-          </div>
-        </div>
+        <FiltersSection
+          barangayList={barangayList}
+          selectedBarangay={selectedBarangay}
+          setSelectedBarangay={setSelectedBarangay}
+          selectedSeverity={selectedSeverity}
+          setSelectedSeverity={setSelectedSeverity}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          setCurrentPage={setCurrentPage}
+        />
 
         {/* Search Bar and Action Buttons */}
         <div className="search-actions">
@@ -698,116 +621,14 @@ function CurrentRecords() {
         </div>
 
         {/* Modal for Create/Edit */}
-        {showModal && (
-          <div className="modal-overlay" onClick={closeModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2 className="modal-title">{modalMode === 'create' ? 'Add New Record' : 'Edit Record'}</h2>
-              
-              <form onSubmit={handleSubmit} className="record-form">
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label>Barangay *</label>
-                    <input
-                      type="text"
-                      value={formData.barangay}
-                      onChange={(e) => setFormData({...formData, barangay: e.target.value})}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Date Committed *</label>
-                    <input
-                      type="date"
-                      value={formData.datecommitted}
-                      onChange={(e) => setFormData({...formData, datecommitted: e.target.value})}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Time Committed</label>
-                    <input
-                      type="time"
-                      value={formData.timecommitted}
-                      onChange={(e) => setFormData({...formData, timecommitted: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Latitude *</label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={formData.lat}
-                      onChange={(e) => setFormData({...formData, lat: e.target.value})}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Longitude *</label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={formData.lng}
-                      onChange={(e) => setFormData({...formData, lng: e.target.value})}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Offense Type *</label>
-                    <input
-                      type="text"
-                      value={formData.offensetype}
-                      onChange={(e) => setFormData({...formData, offensetype: e.target.value})}
-                      required
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label>Severity *</label>
-                    <select
-                      value={formData.severity}
-                      onChange={(e) => setFormData({...formData, severity: e.target.value})}
-                      required
-                      className="form-select"
-                    >
-                      <option value="">Select Severity</option>
-                      <option value="Critical">Critical</option>
-                      <option value="High">High</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Low">Low</option>
-                      <option value="Minor">Minor</option>
-                    </select>
-                  </div>
-
-                  <div className="form-field">
-                    <label>Year *</label>
-                    <input
-                      type="number"
-                      value={formData.year}
-                      onChange={(e) => setFormData({...formData, year: e.target.value})}
-                      required
-                      min="2000"
-                      max="2099"
-                    />
-                  </div>
-                </div>
-
-                <div className="modal-actions">
-                  <button type="button" onClick={closeModal} className="cancel-btn">
-                    Cancel
-                  </button>
-                  <button type="submit" className="submit-btn">
-                    {modalMode === 'create' ? 'Create Record' : 'Update Record'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <RecordModal
+          showModal={showModal}
+          modalMode={modalMode}
+          formData={formData}
+          setFormData={setFormData}
+          handleSubmit={handleSubmit}
+          closeModal={closeModal}
+        />
       </div>
     </div>
   );

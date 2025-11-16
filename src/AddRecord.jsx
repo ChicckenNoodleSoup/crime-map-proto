@@ -2,9 +2,6 @@ import React, { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import {
   Plus,
-  Upload,
-  Database,
-  Map,
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
@@ -14,6 +11,9 @@ import "./PageHeader.css";
 import { DateTime } from "./DateTime";
 import { uploadHistoryService } from "./utils/loggingUtils";
 import { useUpload } from "./contexts/UploadContext";
+import ProcessingSteps from "./components/add-record/ProcessingSteps";
+import UploadSummary from "./components/add-record/UploadSummary";
+import UploadHistoryModal from "./components/add-record/UploadHistoryModal";
 
 export default function AddRecord() {
   const { startUpload, activeUploads, lastCompletedUpload, clearLastCompleted } = useUpload();
@@ -183,6 +183,17 @@ export default function AddRecord() {
     setValidationErrors([]);
     setCurrentUploadSummary(null);
     clearLastCompleted(); // Clear the global last completed upload
+  };
+
+  const handleClearHistory = async () => {
+    if (window.confirm('Are you sure you want to clear the upload history?')) {
+      const success = await uploadHistoryService.clear();
+      if (success) {
+        setUploadHistory([]);
+      } else {
+        alert('Failed to clear history. Please try again.');
+      }
+    }
   };
 
   // Validate file before upload
@@ -446,307 +457,6 @@ export default function AddRecord() {
     }
   });
 
-  const ProcessingSteps = () => {
-    const steps = [
-      { id: 1, label: "Upload File", icon: Upload },
-      { id: 2, label: "Excel → Supabase", icon: Database },
-      { id: 3, label: "Supabase → GeoJSON", icon: Map },
-      { id: 4, label: "Complete", icon: CheckCircle },
-    ];
-
-    return (
-      <div className="processing-steps">
-        <div className="processing-steps-row">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = currentStep === step.id;
-            const isCompleted = currentStep > step.id;
-            const isError = processingStage === "error" && currentStep === step.id;
-
-            return (
-              <div key={step.id} className="processing-step">
-                <div className="step-icon-wrapper">
-                  <div
-                    className={`step-circle 
-                      ${isError ? "error" : ""} 
-                      ${isCompleted ? "completed" : ""} 
-                      ${isActive ? "active" : ""}`}
-                  >
-                    {isError ? (
-                      <AlertCircle className="icon error" />
-                    ) : (
-                      <Icon
-                        className={`icon 
-                          ${isCompleted ? "completed" : ""} 
-                          ${isActive ? "active" : ""}`}
-                      />
-                    )}
-                  </div>
-                  <span
-                    className={`step-label 
-                      ${isError ? "error" : ""} 
-                      ${isCompleted ? "completed" : ""} 
-                      ${isActive ? "active" : ""}`}
-                  >
-                    {step.label}
-                  </span>
-                </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={`step-connector ${
-                      currentStep > step.id ? "completed" : ""
-                    }`}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const UploadSummary = ({ summary }) => {
-    if (!summary) return null;
-
-    const formatFileSize = (bytes) => {
-      if (bytes < 1024) return `${bytes} B`;
-      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-    };
-
-    const formatDateTime = (isoString) => {
-      const date = new Date(isoString);
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-    };
-
-    return (
-      <div className="upload-summary-card">
-        <h3 className="summary-title">📋 Current Upload Summary</h3>
-        <div className="summary-content">
-          <div className="summary-row">
-            <span className="summary-label">File Name:</span>
-            <span className="summary-value">{summary.fileName}</span>
-          </div>
-          <div className="summary-row">
-            <span className="summary-label">File Size:</span>
-            <span className="summary-value">{formatFileSize(summary.fileSize)}</span>
-          </div>
-          <div className="summary-row">
-            <span className="summary-label">Upload Started:</span>
-            <span className="summary-value">{formatDateTime(summary.uploadedAt)}</span>
-          </div>
-          {summary.completedAt && (
-            <div className="summary-row">
-              <span className="summary-label">Completed At:</span>
-              <span className="summary-value">{formatDateTime(summary.completedAt)}</span>
-            </div>
-          )}
-          {summary.processingTime !== undefined && (
-            <div className="summary-row">
-              <span className="summary-label">Processing Time:</span>
-              <span className="summary-value">{summary.processingTime}s</span>
-            </div>
-          )}
-          {summary.newRecords !== undefined && summary.newRecords !== null && (
-            <div className="summary-row">
-              <span className="summary-label">New Records:</span>
-              <span className="summary-value summary-highlight">{summary.newRecords}</span>
-            </div>
-          )}
-          {summary.duplicateRecords !== undefined && summary.duplicateRecords !== null && summary.duplicateRecords > 0 && (
-            <div className="summary-row">
-              <span className="summary-label">Duplicates Skipped:</span>
-              <span className="summary-value summary-duplicate">{summary.duplicateRecords}</span>
-            </div>
-          )}
-          {summary.recordsProcessed !== undefined && summary.recordsProcessed !== null && (
-            <div className="summary-row">
-              <span className="summary-label">Total Records:</span>
-              <span className="summary-value">{summary.recordsProcessed}</span>
-            </div>
-          )}
-          {summary.sheetsProcessed && summary.sheetsProcessed.length > 0 && (
-            <div className="summary-row">
-              <span className="summary-label">Sheets Processed:</span>
-              <span className="summary-value">{summary.sheetsProcessed.join(', ')}</span>
-            </div>
-          )}
-          <div className="summary-row">
-            <span className="summary-label">Status:</span>
-            <span className={`summary-value status-badge ${summary.status}`}>
-              {summary.status === 'success' ? '✅ Success' : 
-               summary.status === 'processing' ? '⏳ Processing' : 
-               '❌ Failed'}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const UploadHistoryModal = () => {
-    if (!showHistoryModal) return null;
-
-    const formatFileSize = (bytes) => {
-      if (bytes < 1024) return `${bytes} B`;
-      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-    };
-
-    const formatDateTime = (isoString) => {
-      const date = new Date(isoString);
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    };
-
-    const clearHistory = async () => {
-      if (window.confirm('Are you sure you want to clear the upload history?')) {
-        const success = await uploadHistoryService.clear();
-        if (success) {
-          setUploadHistory([]);
-        } else {
-          alert('Failed to clear history. Please try again.');
-        }
-      }
-    };
-
-    const handleBackdropClick = (e) => {
-      // Check if clicked element has the backdrop class
-      if (e.target.classList && e.target.classList.contains('history-modal-backdrop')) {
-        setShowHistoryModal(false);
-      }
-    };
-
-    return (
-      <div className="history-modal-backdrop" onClick={handleBackdropClick}>
-        <div className="history-modal">
-          {/* Header */}
-          <div className="history-modal-header">
-            <div className="history-title-section">
-              <h3 className="history-title">Recent Uploads</h3>
-              <span className="history-subtitle">Last 10 uploads</span>
-            </div>
-            <div className="history-modal-actions">
-              <button 
-                onClick={clearHistory} 
-                className="clear-history-btn-modal" 
-                disabled={isLoadingHistory || uploadHistory.length === 0}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                Clear All
-              </button>
-              <button 
-                onClick={() => setShowHistoryModal(false)} 
-                className="close-modal-btn"
-                aria-label="Close"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-          </div>
-          
-          {/* Content */}
-          <div className="history-modal-content">
-            {isLoadingHistory ? (
-              <div className="history-loading">
-                <div className="spinner small" />
-                <p>Loading upload history...</p>
-              </div>
-            ) : uploadHistory.length === 0 ? (
-              <div className="history-empty">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                <p className="empty-title">No upload history yet</p>
-                <p className="empty-subtitle">Your upload history will appear here after you upload files</p>
-              </div>
-            ) : (
-              <div className="history-table-container">
-                <table className="history-table">
-                  <thead>
-                    <tr>
-                      <th>File Name</th>
-                      <th>Size</th>
-                      <th>Upload Time</th>
-                      <th>New</th>
-                      <th>Duplicates</th>
-                      <th>Duration</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {uploadHistory.map((item) => (
-                      <tr key={item.id}>
-                        <td className="file-name-cell">
-                          <div className="file-name-wrapper">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                              <polyline points="13 2 13 9 20 9"></polyline>
-                            </svg>
-                            {item.file_name}
-                          </div>
-                        </td>
-                        <td>{formatFileSize(item.file_size)}</td>
-                        <td>{formatDateTime(item.upload_started_at)}</td>
-                        <td className="new-records-cell">
-                          {item.new_records !== null && item.new_records !== undefined ? item.new_records : 'N/A'}
-                        </td>
-                        <td className="duplicate-records-cell">
-                          {item.duplicate_records !== null && item.duplicate_records !== undefined ? item.duplicate_records : 'N/A'}
-                        </td>
-                        <td>{item.processing_time ? `${item.processing_time}s` : 'N/A'}</td>
-                        <td>
-                          <span className={`status-badge ${item.status}`}>
-                            {item.status === 'success' ? (
-                              <>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                  <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                Success
-                              </>
-                            ) : item.status === 'processing' ? (
-                              <>⏳ Processing</>
-                            ) : (
-                              <>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                                Failed
-                              </>
-                            )}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="dashboard addrecord-page-wrapper">
@@ -783,7 +493,7 @@ export default function AddRecord() {
       <div className="add-record-card">
         
         {/* Always show steppers */}
-        <ProcessingSteps />
+        <ProcessingSteps currentStep={currentStep} processingStage={processingStage} />
 
         {/* Upload Card */}
         <div
@@ -916,7 +626,13 @@ export default function AddRecord() {
       </div>
 
       {/* Upload History Modal */}
-      <UploadHistoryModal />
+      <UploadHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        onClearHistory={handleClearHistory}
+        isLoadingHistory={isLoadingHistory}
+        uploadHistory={uploadHistory}
+      />
     </div>
   );
 }
