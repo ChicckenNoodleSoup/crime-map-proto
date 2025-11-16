@@ -1,4 +1,5 @@
 import React from 'react';
+import Pagination from '../Pagination';
 import { Activity, User, Clock, Mail } from 'lucide-react';
 import { LoadingSpinner } from '../LoadingSpinner';
 
@@ -79,48 +80,14 @@ const LogsTab = ({
         </div>
       </div>
 
-      <div className="pagination-wrapper">
-        <div className="record-count">
-          Showing {logsDisplayStart}-{logsDisplayEnd} of {userLogs.length} logs
-        </div>
-        
-        {logsTotalPages > 1 && (
-          <div className="pagination">
-            <button
-              onClick={() => onPageChange(prev => Math.max(prev - 1, 1))}
-              disabled={logsCurrentPage === 1}
-              className="pagination-btn"
-            >
-              ⬅ Prev
-            </button>
-            
-            {Array.from({ length: logsTotalPages }, (_, i) => i + 1)
-              .slice(
-                Math.max(0, logsCurrentPage - 3),
-                Math.min(logsTotalPages, logsCurrentPage + 2)
-              )
-              .map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => onPageChange(pageNum)}
-                  className={`pagination-number ${
-                    logsCurrentPage === pageNum ? "active" : ""
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              ))}
-            
-            <button
-              onClick={() => onPageChange(prev => Math.min(prev + 1, logsTotalPages))}
-              disabled={logsCurrentPage === logsTotalPages}
-              className="pagination-btn"
-            >
-              Next ➡
-            </button>
-          </div>
-        )}
-      </div>
+      <Pagination
+        currentPage={logsCurrentPage}
+        totalPages={logsTotalPages}
+        onPageChange={onPageChange}
+        totalItems={userLogs.length}
+        itemsPerPage={20}
+        itemName="logs"
+      />
     </>
   );
 };

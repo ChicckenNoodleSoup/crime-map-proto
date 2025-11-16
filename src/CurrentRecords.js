@@ -11,6 +11,7 @@ import { useUpload } from "./contexts/UploadContext";
 import { LoadingSpinner } from "./components/LoadingSpinner";
 import RecordModal from "./components/records/RecordModal";
 import FiltersSection from "./components/records/FiltersSection";
+import Pagination from "./components/Pagination";
 
 function CurrentRecords() {
   // Use persistent state for filters, search, sort, and pagination
@@ -569,56 +570,23 @@ function CurrentRecords() {
         </div>
 
         {/* Pagination and Record Count */}
-        <div className="pagination-wrapper">
-          <div className="record-count">
-            Showing {displayStart}-{displayEnd} of {sortedRecords.length} records
-            {sortedRecords.length !== records.length && (
-              <span className="filtered-indicator"> (filtered from {records.length} total)</span>
-            )}
-            {loadingMore && (
-              <span className="loading-more-indicator" style={{ marginLeft: '10px', color: '#ffd166', fontSize: '0.9em' }}>
-                ⏳ Loading more records...
-              </span>
-            )}
-          </div>
-          
-          <div className="pagination">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="pagination-btn"
-            >
-              ⬅ Prev
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .slice(
-                Math.max(0, currentPage - 3),
-                Math.min(totalPages, currentPage + 2)
-              )
-              .map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={`pagination-number ${
-                    currentPage === pageNum ? "active" : ""
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              ))}
-
-            <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-              className="pagination-btn"
-            >
-              Next ➡
-            </button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalItems={sortedRecords.length}
+          itemsPerPage={recordsPerPage}
+          itemName="records"
+        >
+          {sortedRecords.length !== records.length && (
+            <span className="filtered-indicator"> (filtered from {records.length} total)</span>
+          )}
+          {loadingMore && (
+            <span className="loading-more-indicator" style={{ marginLeft: '10px', color: '#ffd166', fontSize: '0.9em' }}>
+              ⏳ Loading more records...
+            </span>
+          )}
+        </Pagination>
 
         {/* Modal for Create/Edit */}
         <RecordModal

@@ -441,20 +441,19 @@ export default function MapView() {
     return { availableYears: years, availableLocations: locations, availableOffenseTypes: offenseTypes, availableSeverities: severities };
   }, [accidentData]);
 
-  // CHANGED: Filter data based on selected filters - updated year logic
-  const filteredData = useMemo(() => {
-    if (!accidentData) return { accidentPoints: [], clusterCenters: [], stats: null };
+  // OPTIMIZATION: Split large useMemo into 3 granular memos for better performance
+  // 1. Filter accidents based on selected filters
+  const filteredAccidents = useMemo(() => {
+    if (!accidentData) return [];
 
-    let accidents = accidentData.features.filter(f =>
+    // Get all accident features (exclude cluster centers)
+    const allAccidents = accidentData.features.filter(f =>
       f.properties && f.geometry && f.geometry.coordinates &&
       f.properties.type !== "cluster_center"
     );
-    let clusters = accidentData.features.filter(f =>
-      f.properties && f.properties.type === "cluster_center"
-    );
 
     // Apply filters with updated year logic
-    accidents = accidents.filter(f => {
+    return allAccidents.filter(f => {
       const { year, barangay, offensetype, severity } = f.properties;
       
       // Convert year to string for comparison
@@ -468,15 +467,27 @@ export default function MapView() {
 
       return yearMatch && locationMatch && offenseMatch && severityMatch;
     });
+  }, [accidentData, selectedYears, selectedLocation, selectedOffenseType, selectedSeverity]);
+
+  // 2. Filter clusters based on filtered accidents (depends on filteredAccidents)
+  const filteredClusters = useMemo(() => {
+    if (!accidentData || filteredAccidents.length === 0) return [];
+
+    // Get all cluster center features
+    const allClusters = accidentData.features.filter(f =>
+      f.properties && f.properties.type === "cluster_center"
+    );
 
     // Filter clusters to only show those that contain at least one of the currently filtered accidents
-    const visibleClusterIds = new Set(accidents.map(a => a.properties.cluster));
-    const filteredClusters = clusters.filter(c => visibleClusterIds.has(c.properties.cluster_id));
+    const visibleClusterIds = new Set(filteredAccidents.map(a => a.properties.cluster));
+    const clustersWithAccidents = allClusters.filter(c => 
+      visibleClusterIds.has(c.properties.cluster_id)
+    );
     
-    // Update cluster count based on filtered clusters
-    const updatedClusters = filteredClusters.map(c => {
+    // Update cluster count and offense counts based on filtered accidents
+    return clustersWithAccidents.map(c => {
       const clusterId = c.properties.cluster_id;
-      const clusterAccidents = accidents.filter(a => a.properties.cluster === clusterId);
+      const clusterAccidents = filteredAccidents.filter(a => a.properties.cluster === clusterId);
       const accidentCount = clusterAccidents.length;
     
       // Count offense types within this cluster
@@ -491,22 +502,35 @@ export default function MapView() {
         properties: {
           ...c.properties,
           accident_count: accidentCount,
-          offense_counts: offenseCounts, // <-- NEW
+          offense_counts: offenseCounts,
         }
       };
     });
-    
+  }, [accidentData, filteredAccidents]);
+
+  // 3. Calculate stats from filtered data (depends on both filteredAccidents and filteredClusters)
+  const stats = useMemo(() => {
+    if (!filteredAccidents || filteredAccidents.length === 0) {
+      return {
+        totalAccidents: 0,
+        totalClusters: 0,
+        noisePoints: 0
+      };
+    }
 
     return {
-      accidentPoints: accidents,
-      clusterCenters: updatedClusters,
-      stats: {
-        totalAccidents: accidents.length,
-        totalClusters: updatedClusters.length,
-        noisePoints: accidents.filter(f => f.properties.cluster === -1).length
-      },
+      totalAccidents: filteredAccidents.length,
+      totalClusters: filteredClusters.length,
+      noisePoints: filteredAccidents.filter(f => f.properties.cluster === -1).length
     };
-  }, [accidentData, selectedYears, selectedLocation, selectedOffenseType, selectedSeverity]);
+  }, [filteredAccidents, filteredClusters]);
+
+  // Combine into filteredData object for backward compatibility
+  const filteredData = useMemo(() => ({
+    accidentPoints: filteredAccidents,
+    clusterCenters: filteredClusters,
+    stats: stats
+  }), [filteredAccidents, filteredClusters, stats]);
 
   useEffect(() => {
     async function fetchData() {

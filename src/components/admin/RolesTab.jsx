@@ -1,4 +1,5 @@
 import React from 'react';
+import Pagination from '../Pagination';
 import { User, CheckCircle } from 'lucide-react';
 import SingleSelectDropdown from '../../SingleSelectDropdown';
 
@@ -57,48 +58,14 @@ const RolesTab = ({
         </div>
       </div>
 
-      <div className="pagination-wrapper">
-        <div className="record-count">
-          Showing {rolesDisplayStart}-{rolesDisplayEnd} of {approvedAccountsForRoles.length} users
-        </div>
-        
-        {rolesTotalPages > 1 && (
-          <div className="pagination">
-            <button
-              onClick={() => onPageChange(prev => Math.max(prev - 1, 1))}
-              disabled={rolesCurrentPage === 1}
-              className="pagination-btn"
-            >
-              ⬅ Prev
-            </button>
-            
-            {Array.from({ length: rolesTotalPages }, (_, i) => i + 1)
-              .slice(
-                Math.max(0, rolesCurrentPage - 3),
-                Math.min(rolesTotalPages, rolesCurrentPage + 2)
-              )
-              .map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => onPageChange(pageNum)}
-                  className={`pagination-number ${
-                    rolesCurrentPage === pageNum ? "active" : ""
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              ))}
-            
-            <button
-              onClick={() => onPageChange(prev => Math.min(prev + 1, rolesTotalPages))}
-              disabled={rolesCurrentPage === rolesTotalPages}
-              className="pagination-btn"
-            >
-              Next ➡
-            </button>
-          </div>
-        )}
-      </div>
+      <Pagination
+        currentPage={rolesCurrentPage}
+        totalPages={rolesTotalPages}
+        onPageChange={onPageChange}
+        totalItems={approvedAccountsForRoles.length}
+        itemsPerPage={20}
+        itemName="users"
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Users, User, CheckCircle, XCircle, Clock } from 'lucide-react';
+import Pagination from '../Pagination';
 
 const AccountsTab = ({
   accountsSubTab,
@@ -180,48 +181,14 @@ const AccountsTab = ({
             </div>
           </div>
 
-          <div className="pagination-wrapper">
-            <div className="record-count">
-              Showing {accountsDisplayStart}-{accountsDisplayEnd} of {accountsForCurrentTab.length} accounts
-            </div>
-            
-            {accountsTotalPages > 1 && (
-              <div className="pagination">
-                <button
-                  onClick={() => onPageChange(prev => Math.max(prev - 1, 1))}
-                  disabled={accountsCurrentPage === 1}
-                  className="pagination-btn"
-                >
-                  ⬅ Prev
-                </button>
-                
-                {Array.from({ length: accountsTotalPages }, (_, i) => i + 1)
-                  .slice(
-                    Math.max(0, accountsCurrentPage - 3),
-                    Math.min(accountsTotalPages, accountsCurrentPage + 2)
-                  )
-                  .map((pageNum) => (
-                    <button
-                      key={pageNum}
-                      onClick={() => onPageChange(pageNum)}
-                      className={`pagination-number ${
-                        accountsCurrentPage === pageNum ? "active" : ""
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  ))}
-                
-                <button
-                  onClick={() => onPageChange(prev => Math.min(prev + 1, accountsTotalPages))}
-                  disabled={accountsCurrentPage === accountsTotalPages}
-                  className="pagination-btn"
-                >
-                  Next ➡
-                </button>
-              </div>
-            )}
-          </div>
+          <Pagination
+            currentPage={accountsCurrentPage}
+            totalPages={accountsTotalPages}
+            onPageChange={onPageChange}
+            totalItems={accountsForCurrentTab.length}
+            itemsPerPage={20}
+            itemName="accounts"
+          />
         </>
       )}
     </>

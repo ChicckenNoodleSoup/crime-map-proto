@@ -203,41 +203,8 @@
   }
 }
 
-/* Scrollbar Styles */
-.dashboard::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background: transparent;
-}
-
-.dashboard::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  margin: 4px 0;
-}
-
-.dashboard::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-.dashboard::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-.dashboard::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-/* Firefox Scrollbar */
-.dashboard {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
-}
+/* Scrollbar styles are now centralized in src/styles/scrollbar.css */
+/* The .dashboard class uses the unified scrollbar styles */
 
 /* Dashboard card stat area (frosted, large number) */
 .dashboard-card-stat {

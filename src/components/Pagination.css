@@ -1,0 +1,130 @@
+/* 
+ * OSIMAP Pagination Component Styles
+ * Centralized pagination styles used across the application
+ * Consistent with design system tokens
+ */
+
+/* ========================================
+ * PAGINATION WRAPPER
+ * ======================================== */
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ========================================
+ * RECORD COUNT
+ * ======================================== */
+.record-count {
+  font-size: 0.95rem;
+  color: #dbefff;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ========================================
+ * PAGINATION CONTROLS
+ * ======================================== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
+
+/* ========================================
+ * PAGINATION BUTTONS
+ * ======================================== */
+.pagination-btn,
+.pagination-number {
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background var(--transition-normal, 0.3s ease), 
+              transform var(--transition-fast, 0.2s ease), 
+              box-shadow var(--transition-normal, 0.3s ease);
+  font-size: 14px;
+  min-width: 36px;
+  text-align: center;
+}
+
+.pagination-btn:hover:not(:disabled),
+.pagination-number:hover {
+  background: rgba(0, 133, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 0 6px rgba(0, 133, 255, 0.4);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========================================
+ * ACTIVE PAGE NUMBER
+ * ======================================== */
+.pagination-number.active {
+  background: var(--color-primary, #0085FF);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 0 6px rgba(0, 133, 255, 0.6);
+}
+
+.pagination-number.active:hover {
+  background: var(--color-primary-600, #0072d9);
+}
+
+/* ========================================
+ * RESPONSIVE DESIGN
+ * ======================================== */
+@media (max-width: 768px) {
+  .pagination-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .record-count {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    gap: 8px;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .pagination-btn,
+  .pagination-number {
+    padding: 5px 10px;
+    font-size: 13px;
+    min-width: 32px;
+  }
+}
+
